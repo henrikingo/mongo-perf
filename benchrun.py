@@ -35,18 +35,24 @@ def parse_arguments():
     parser.add_argument('--trialCount', dest='trials',
                         help='Specify how many trials to run',
                         type=int, default=1)
-    parser.add_argument('--shard', dest='shard',
-                        help='Specify shard cluster the test should use, 0 - no shard, 1 - shard with {_id: hashed}, 2 - shard with {_id: 1}',
-                        type=int, default=0, choices=[0, 1, 2])
     parser.add_argument('--host', dest='hostname',
                         help='hostname of the mongod/mongos under test',
                         default='localhost')
-    parser.add_argument('-p', '--port', dest='port',
+    parser.add_argument('--port', dest='port',
                         help='Port of the mongod/mongos under test',
                         default='27017')
     parser.add_argument('--replset', dest='replica_set',
                         help='replica set name of the mongod/mongos under test',
                         default=None)
+    parser.add_argument('-u', '--username', dest='username',
+                        help='username to use for mongodb authentication',
+                        default=None)
+    parser.add_argument('-p', '--password', dest='password',
+                        help='password to use for mongodb authentication',
+                        default=None)
+    parser.add_argument('--shard', dest='shard',
+                        help='Specify shard cluster the test should use, 0 - no shard, 1 - shard with {_id: hashed}, 2 - shard with {_id: 1}',
+                        type=int, default=0, choices=[0, 1, 2])
     parser.add_argument('-s', '--shell', dest='shellpath',
                         help="Path to the mongo shell executable to use.",
                         default='mongo')
@@ -150,14 +156,21 @@ def main():
             args.includeFilter = '%'
 
     # Print version info.
+    if args.username:
+        auth = ["-u", args.username, "-p", args.password]
+    else:
+        auth = []
+
+    print(auth)
     call([args.shellpath, "--norc", "--port", args.port, "--eval",
-          "print('db version: ' + db.version());"
-          " db.serverBuildInfo().gitVersion;"])
+            "print('db version: ' + db.version());"
+            " db.serverBuildInfo().gitVersion;"] + auth)
     print("")
 
 
     # Open a mongo shell subprocess and load necessary files.
-    mongo_proc = Popen([args.shellpath, "--norc", "--quiet", "--port", args.port], stdin=PIPE, stdout=PIPE)
+    mongo_proc = Popen([args.shellpath, "--norc", "--quiet", "--port", args.port] + auth, 
+                       stdin=PIPE, stdout=PIPE)
 
     # load test files
     load_file_in_shell(mongo_proc, 'util/utils.js')
