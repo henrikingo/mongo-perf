@@ -157,11 +157,10 @@ def main():
 
     # Print version info.
     if args.username:
-        auth = ["-u", args.username, "-p", args.password]
+        auth = ["-u", args.username, "-p", args.password, "--authenticationDatabase", "admin"]
     else:
         auth = []
 
-    print(auth)
     call([args.shellpath, "--norc", "--port", args.port, "--eval",
             "print('db version: ' + db.version());"
             " db.serverBuildInfo().gitVersion;"] + auth)
@@ -169,7 +168,7 @@ def main():
 
 
     # Open a mongo shell subprocess and load necessary files.
-    mongo_proc = Popen([args.shellpath, "--norc", "--quiet", "--port", args.port] + auth, 
+    mongo_proc = Popen([args.shellpath, "--norc", "--quiet", "--port", args.port] + auth,
                        stdin=PIPE, stdout=PIPE)
 
     # load test files
@@ -188,6 +187,10 @@ def main():
     crud_options["writeCmdMode"] = args.writeCmd
     crud_options["readCmdMode"] = args.readCmd
 
+    authstr = ""
+    if isinstance(args.username, basestring) and isinstance(args.password, basestring):
+        authstr = ", '" + args.username + "', '" + args.password + "'"
+
     cmdstr = ("mongoPerfRunTests(" +
               str(args.threads) + ", " +
               str(args.multidb) + ", " +
@@ -198,17 +201,16 @@ def main():
               str(json.dumps(args.excludeFilter)) + ", " +
               str(args.shard) + ", " +
               str(json.dumps(crud_options)) + ", " + 
-              str(args.excludeTestbed) + "," + 
-              str(args.printArgs) +  "," +
-              str(args.username) + "," +
-              str(args.password) +
+              str(args.excludeTestbed) + ", " + 
+              str(args.printArgs) +
+              authstr +
               ");\n")
     mongo_proc.stdin.write(cmdstr)
     print cmdstr
     mongo_proc.stdin.close()
 
     # Read test output.
-    readout = False
+    readout = True
     getting_results = False
     got_results = False
     line_results = ""
