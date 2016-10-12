@@ -188,7 +188,6 @@ def main():
     crud_options["writeCmdMode"] = args.writeCmd
     crud_options["readCmdMode"] = args.readCmd
 
-    # Pipe commands to the mongo shell to kickoff the test.
     cmdstr = ("mongoPerfRunTests(" +
               str(args.threads) + ", " +
               str(args.multidb) + ", " +
@@ -200,7 +199,9 @@ def main():
               str(args.shard) + ", " +
               str(json.dumps(crud_options)) + ", " + 
               str(args.excludeTestbed) + "," + 
-              str(args.printArgs) + 
+              str(args.printArgs) +  "," +
+              str(args.username) + "," +
+              str(args.password) +
               ");\n")
     mongo_proc.stdin.write(cmdstr)
     print cmdstr
