@@ -155,12 +155,12 @@ def main():
         if args.includeFilter == ['%'] :
             args.includeFilter = '%'
 
-    # Print version info.
     if args.username:
         auth = ["-u", args.username, "-p", args.password, "--authenticationDatabase", "admin"]
     else:
         auth = []
 
+    # Print version info.
     call([args.shellpath, "--norc", "--port", args.port, "--eval",
             "print('db version: ' + db.version());"
             " db.serverBuildInfo().gitVersion;"] + auth)
@@ -210,7 +210,7 @@ def main():
     mongo_proc.stdin.close()
 
     # Read test output.
-    readout = True
+    readout = False
     getting_results = False
     got_results = False
     line_results = ""
