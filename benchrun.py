@@ -148,17 +148,21 @@ def main():
         print("shard option must be [0, 2] . Will be set to 2.")
         args.shard = 2
 
+    auth = []
+    using_auth = False
+    if isinstance(args.username, basestring) and isinstance(args.password, basestring):
+        auth = ["-u", args.username, "-p", args.password, "--authenticationDatabase", "admin"]
+        using_auth = True
+    elif isinstance(args.username, basestring) or isinstance(args.password, basestring):
+        print("Warning: You specified one of username or password, but not the other.")
+        print("         Benchrun will continue without authentication.")
+
     if args.includeFilter == [] :
         args.includeFilter = '%'
     elif len(args.includeFilter) == 1 :
         args.includeFilter = args.includeFilter[0]
         if args.includeFilter == ['%'] :
             args.includeFilter = '%'
-
-    if args.username:
-        auth = ["-u", args.username, "-p", args.password, "--authenticationDatabase", "admin"]
-    else:
-        auth = []
 
     # Print version info.
     call([args.shellpath, "--norc", "--port", args.port, "--eval",
@@ -188,7 +192,7 @@ def main():
     crud_options["readCmdMode"] = args.readCmd
 
     authstr = ""
-    if isinstance(args.username, basestring) and isinstance(args.password, basestring):
+    if using_auth:
         authstr = ", '" + args.username + "', '" + args.password + "'"
 
     cmdstr = ("mongoPerfRunTests(" +
@@ -201,7 +205,7 @@ def main():
               str(json.dumps(args.excludeFilter)) + ", " +
               str(args.shard) + ", " +
               str(json.dumps(crud_options)) + ", " + 
-              str(args.excludeTestbed) + ", " + 
+              str(args.excludeTestbed) + ", " +
               str(args.printArgs) +
               authstr +
               ");\n")

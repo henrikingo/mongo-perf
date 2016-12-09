@@ -380,7 +380,7 @@ function runTests(threadCounts, multidb, multicoll, seconds, trials, includeFilt
                                      threadCount: threadCount,
                                      multidb: multidb,
                                      multicoll: multicoll,
-                                     shard: shard, 
+                                     shard: shard,
                                      crudOptions: crudOptions,
                                      username: username,
                                      password: password,
