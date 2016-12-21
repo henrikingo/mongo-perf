@@ -116,6 +116,23 @@ var docs = []
 for (var i = 0; i < batchSize; i++) {
     docs.push(doc)
 }
+/*
+ * Setup:
+ * Test: Insert a vector of large documents. Each document contains a long string
+ * Notes: Generates the _id field on the client
+ * NOTE: This test generates lots of data and leaves the system in unstable state. To allow system
+ *       to stabilize, we sleep after the test. Hopefully this leaves a clean table for the
+ *       following tests.
+ */
+tests.push( { name: "Insert.LargeDocVector",
+              tags: ['insert','regression'],
+              pre: function( collection ) { collection.drop(); },
+              post: function( collection ) { sleep(120*1000); },
+              ops: [
+                  { op:  "insert",
+                    doc: docs }
+              ] } );
+
 
 
 /*
@@ -245,18 +262,3 @@ tests.push( { name: "InsertIndexedStringsNonSimpleCollation",
               ops: [
                   { op: "insert", doc: { a: { "#RAND_STRING": [10] } } }
               ] } );
-
-/*
- * Setup:
- * Test: Insert a vector of large documents. Each document contains a long string
- * Notes: Generates the _id field on the client
- *        
- */
-tests.push( { name: "Insert.LargeDocVector",
-              tags: ['insert','regression'],
-              pre: function( collection ) { collection.drop(); },
-              ops: [
-                  { op:  "insert",
-                    doc: docs }
-              ] } );
-
